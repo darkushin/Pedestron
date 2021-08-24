@@ -133,6 +133,7 @@ def show_result(img, result, class_names, score_thr=0.3, out_file=None):
         for i, bbox in enumerate(bbox_result)
     ]
     labels = np.concatenate(labels)
+    print(f'bboxes: {bboxes}')
     mmcv.imshow_det_bboxes(
         img.copy(),
         bboxes,
