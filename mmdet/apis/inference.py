@@ -10,6 +10,8 @@ from mmdet.core import get_classes
 from mmdet.datasets import to_tensor
 from mmdet.datasets.transforms import ImageTransform
 from mmdet.models import build_detector
+from mmcv.image import imread, imwrite
+import copy
 
 
 def init_detector(config, checkpoint=None, device='cuda:0'):
@@ -112,6 +114,7 @@ def show_result(img, result, class_names, score_thr=0.3, out_file=None):
         out_file (str, optional): If specified, the visualization result will
             be written to the out file instead of shown in a window.
     """
+    orig_img = copy.deepcopy(img)
     assert isinstance(class_names, (tuple, list))
     img = mmcv.imread(img)
     if isinstance(result, tuple):
@@ -133,7 +136,14 @@ def show_result(img, result, class_names, score_thr=0.3, out_file=None):
         for i, bbox in enumerate(bbox_result)
     ]
     labels = np.concatenate(labels)
-    print(f'bboxes: {bboxes}')
+    # bboxes = bboxes[0:3]
+    # labels = labels[0:3]
+    croped_boxes = bboxes[:, :-1]
+    croped_im = mmcv.image.imcrop(orig_img, croped_boxes, scale=1.0, pad_fill=None)
+    for i in range(len(croped_im)):
+      per_crop = np.array(croped_im[i])
+      croped_out = out_file.split('.jpg')[0] + f'_crop_{i}.jpg'
+      imwrite(per_crop, croped_out)
     mmcv.imshow_det_bboxes(
         img.copy(),
         bboxes,
